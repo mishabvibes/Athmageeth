@@ -23,7 +23,7 @@ export async function getRegistrations({
         const regex = new RegExp(query, 'i');
         filter.$or = [
             { institutionName: regex },
-            { candidateNames: regex },
+            { 'candidates.name': regex },
             { district: regex },
             { whatsappNumber: regex },
             { place: regex },
@@ -63,6 +63,39 @@ export async function getRegistrations({
     } catch (error) {
         console.error('Failed to fetch registrations:', error);
         return { data: [], totalPages: 0, totalCount: 0 };
+    }
+}
+
+export async function getDashboardStats() {
+    try {
+        await dbConnect();
+
+        const totalTeams = await Registration.countDocuments();
+
+        // Aggregate to get total candidates
+        // Note: candidates is an array of objects
+        const candidateStats = await Registration.aggregate([
+            { $project: { candidateCount: { $size: "$candidates" } } },
+            { $group: { _id: null, total: { $sum: "$candidateCount" } } }
+        ]);
+        const totalCandidates = candidateStats[0]?.total || 0;
+
+        // Aggregate by District
+        const districtStats = await Registration.aggregate([
+            { $group: { _id: "$district", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 6 }
+        ]);
+
+        return {
+            totalTeams,
+            totalCandidates,
+            districtStats: districtStats.map(d => ({ district: d._id, count: d.count }))
+        };
+
+    } catch (error) {
+        console.error('Failed to get stats', error);
+        return { totalTeams: 0, totalCandidates: 0, districtStats: [] };
     }
 }
 
