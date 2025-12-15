@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: var(--font-inter);
+  --font-malayalam: var(--font-baloo);
+}
+
+:root {
+  /* Dark Maroon/Brown Background */
+  --background: #1a0f0f;
+  --foreground: #f5e6d3;
+  /* Soft cream/gold-white */
+
+  /* Gold/Orange Accents */
+  --primary: #d4af37;
+  /* Gold */
+  --primary-foreground: #1a0f0f;
+
+  --secondary: #2d1b1b;
+  /* Lighter maroon for cards */
+  --secondary-foreground: #f5e6d3;
+
+  --accent: #e67e22;
+  /* Orange */
+  --accent-foreground: #ffffff;
+
+  --destructive: #9b2c2c;
+  --destructive-foreground: #ffffff;
+
+  --muted: #3e2723;
+  --muted-foreground: #a18e84;
+
+  --card: #261616;
+  /* Slightly lighter than background */
+  --card-foreground: #f5e6d3;
+
+  --border: #4a3030;
+  --input: #4a3030;
+  --ring: #d4af37;
+
+  --radius: 0.75rem;
+}
+
+body {
+  background: radial-gradient(circle at top center, #2d1b1b, #1a0f0f);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--muted);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
