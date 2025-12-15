@@ -60,7 +60,7 @@
 }
 
 body {
-  background: radial-gradient(circle at top center, #2d1b1b, #1a0f0f);
+  background: radial-gradient(circle at top center, #000000, #000000);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
   overflow-x: hidden;
