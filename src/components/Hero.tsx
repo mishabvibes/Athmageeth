@@ -8,7 +8,7 @@ import { ArrowRight } from 'lucide-react';
 
 export function Hero() {
     return (
-        <section className="relative w-full h-screen flex flex-col items-center justify-center overflow-hidden bg-black/90">
+        <section className="relative w-full min-h-[100dvh] flex flex-col items-center justify-center overflow-hidden bg-black/90 pb-20 pt-20">
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <Image
@@ -30,7 +30,7 @@ export function Hero() {
                     initial={{ opacity: 0, scale: 0.9, y: 20 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut" }}
-                    className="relative w-full max-w-xs sm:max-w-md md:max-w-2xl lg:max-w-4xl aspect-[4/3] sm:aspect-video md:aspect-[21/9]"
+                    className="relative w-full max-w-[90%] sm:max-w-md md:max-w-2xl lg:max-w-4xl aspect-[16/10] sm:aspect-video md:aspect-[21/9]"
                 >
                     <Image
                         src="/content.png"
