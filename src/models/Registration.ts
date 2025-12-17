@@ -14,6 +14,8 @@ export interface IRegistration extends Document {
     unionOfficialNumber: string;
     principalName: string;
     principalPhone: string;
+    receiptUrl?: string;
+    paymentStatus?: 'pending' | 'verified' | 'rejected';
     createdAt: Date;
 }
 
@@ -71,6 +73,15 @@ const RegistrationSchema: Schema = new Schema<IRegistration>(
             required: [true, 'Phone number of Principal is required'],
             trim: true,
         },
+        receiptUrl: {
+            type: String,
+            // required: [true, 'Payment receipt is required'], // Make optional initially for backward comp if needed, but form enforces it
+        },
+        paymentStatus: {
+            type: String,
+            enum: ['pending', 'verified', 'rejected'],
+            default: 'pending'
+        }
     },
     {
         timestamps: true,

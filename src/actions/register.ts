@@ -47,7 +47,8 @@ export async function registerParticipant(
             whatsappNumber,
             unionOfficialNumber,
             principalName,
-            principalPhone
+            principalPhone,
+            receiptUrl
         } = validatedFields.data;
 
         await dbConnect();
@@ -69,11 +70,13 @@ export async function registerParticipant(
             institutionName,
             place,
             district,
-            candidates, // Updated structure
+            candidates,
             whatsappNumber,
             unionOfficialNumber,
             principalName,
             principalPhone,
+            receiptUrl,
+            paymentStatus: 'pending'
         });
 
         // 4. Revalidate Admin Data

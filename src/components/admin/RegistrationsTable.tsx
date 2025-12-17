@@ -12,7 +12,7 @@ import {
     TableRow
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight, Trash2, Crown, Eye, Phone, MapPin, Building, User } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trash2, Crown, Eye, Phone, MapPin, Building, User, Download } from 'lucide-react';
 import { deleteRegistration } from '@/actions/admin';
 import { toast } from 'sonner';
 import { Modal } from '@/components/ui/modal';
@@ -32,6 +32,7 @@ interface Registration {
     unionOfficialNumber: string;
     principalName: string;
     principalPhone: string;
+    receiptUrl?: string; // Optional for now
     createdAt: string;
 }
 
@@ -166,6 +167,17 @@ export function RegistrationsTable({
                                             >
                                                 <Eye className="w-4 h-4" />
                                             </Button>
+                                            {reg.receiptUrl && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => window.open(reg.receiptUrl, '_blank')}
+                                                    className="text-muted-foreground hover:text-green-400 hover:bg-green-950/20 h-8 w-8"
+                                                    title="View Receipt"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-receipt w-4 h-4"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M14 8h-2" /><path d="M14 12h-2" /><path d="M14 16h-2" /><path d="M10 8H6" /><path d="M10 12H6" /><path d="M10 16H6" /></svg>
+                                                </Button>
+                                            )}
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
@@ -381,6 +393,52 @@ export function RegistrationsTable({
                                 </div>
                             </div>
                         </div>
+
+                        {/* Payment Information */}
+                        {/* Payment Information */}
+                        {selectedReg.receiptUrl && (
+                            <div className="bg-green-950/20 p-4 rounded-xl border border-green-500/20 space-y-4">
+                                <div className="flex items-center gap-2 text-green-400 mb-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-receipt w-4 h-4"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z" /><path d="M14 8h-2" /><path d="M14 12h-2" /><path d="M14 16h-2" /><path d="M10 8H6" /><path d="M10 12H6" /><path d="M10 16H6" /></svg>
+                                    <span className="text-xs font-bold uppercase tracking-wider">Payment Details</span>
+                                </div>
+
+                                {/* Receipt Preview */}
+                                <div className="relative w-full aspect-video rounded-lg overflow-hidden border border-white/10 bg-black/40 group">
+                                    {/* Using standard img for simplicity with dynamic local paths */}
+                                    <img
+                                        src={selectedReg.receiptUrl}
+                                        alt="Payment Receipt"
+                                        className="w-full h-full object-contain"
+                                    />
+
+                                    {/* Overlay Actions */}
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 backdrop-blur-sm">
+                                        <Button
+                                            onClick={() => window.open(selectedReg.receiptUrl, '_blank')}
+                                            variant="secondary"
+                                            size="sm"
+                                        >
+                                            <Eye className="w-4 h-4 mr-2" /> View Full
+                                        </Button>
+                                        <a
+                                            href={selectedReg.receiptUrl}
+                                            download={`Receipt_${selectedReg.institutionName}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Button variant="outline" size="sm">
+                                                <Download className="w-4 h-4 mr-2" /> Download
+                                            </Button>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                    <span>Status: <span className="text-green-400 font-medium capitalize">Submitted</span></span>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="text-[10px] text-center text-muted-foreground/50 pt-2 font-mono">
                             ID: {selectedReg._id} • Registered: {new Date(selectedReg.createdAt).toLocaleString()}

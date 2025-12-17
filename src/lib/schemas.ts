@@ -35,6 +35,7 @@ export const registrationSchema = z.object({
         .min(10, { message: 'Principal Phone Number must be at least 10 digits.' })
         .max(15, { message: 'Number is too long.' })
         .regex(phoneRegex, { message: phoneMessage }),
+    receiptUrl: z.string().min(1, { message: 'Payment receipt is required.' }).optional(), // Optional in schema but we check in form
 });
 
 export type RegistrationFormValues = z.infer<typeof registrationSchema>;

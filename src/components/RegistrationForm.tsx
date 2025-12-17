@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import Image from 'next/image';
+import { Check } from 'lucide-react';
 
 type FormValues = z.infer<typeof registrationSchema>;
 
@@ -37,8 +39,45 @@ export function RegistrationForm() {
             unionOfficialNumber: '',
             principalName: '',
             principalPhone: '',
+            receiptUrl: '',
         },
     });
+
+    const [uploading, setUploading] = useState(false);
+    const [receiptUrl, setReceiptUrl] = useState<string | null>(null);
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploading(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Add institute name for better file naming if available
+        const instituteName = form.getValues('institutionName');
+        if (instituteName) formData.append('instituteName', instituteName);
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error || 'Upload failed');
+
+            setReceiptUrl(data.url);
+            form.setValue('receiptUrl', data.url);
+            toast.success('Receipt uploaded successfully!');
+        } catch (error) {
+            console.error(error);
+            toast.error('Failed to upload receipt. Please try again.');
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const { fields, append, remove } = useFieldArray({
         control: form.control,
@@ -56,9 +95,13 @@ export function RegistrationForm() {
     };
 
     function onSubmit(data: FormValues) {
-        // Double check strictly one leader on client before identifying submit
         if (data.candidates.filter(c => c.isLeader).length !== 1) {
             form.setError('candidates', { message: 'Please select exactly one Team Leader.' });
+            return;
+        }
+
+        if (!data.receiptUrl) {
+            toast.error('Please upload the payment receipt.');
             return;
         }
 
@@ -69,6 +112,11 @@ export function RegistrationForm() {
                 setIsSuccess(true);
                 toast.success(result.message);
                 form.reset();
+
+                // Redirect to WhatsApp group after a short delay
+                setTimeout(() => {
+                    window.location.href = "https://chat.whatsapp.com/FQshIGaSZsJDYh9znLC8uz?mode=hqrt1";
+                }, 2000);
             } else {
                 toast.error(result.message);
                 if (result.errors) {
@@ -97,15 +145,27 @@ export function RegistrationForm() {
                     </div>
                     <div className="space-y-2">
                         <h2 className="text-3xl font-bold font-malayalam text-green-400">Successfully Registered!</h2>
-                        <p className="text-muted-foreground bg-green-900/10 p-2 rounded-lg inline-block">Thank you for registering. Good luck!</p>
+                        <p className="text-muted-foreground bg-green-900/10 p-2 rounded-lg inline-block">
+                            Redirecting to WhatsApp group...
+                        </p>
                     </div>
-                    <Button
-                        className="mt-6 border-green-500/30 text-green-300 hover:bg-green-900/40"
-                        variant="outline"
-                        onClick={() => setIsSuccess(false)}
-                    >
-                        Register Another Participant
-                    </Button>
+
+                    <div className="flex flex-col gap-3 w-full">
+                        <Button
+                            className="w-full bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => window.location.href = "https://chat.whatsapp.com/FQshIGaSZsJDYh9znLC8uz?mode=hqrt1"}
+                        >
+                            Join WhatsApp Group Now
+                        </Button>
+
+                        <Button
+                            className="w-full border-green-500/30 text-green-300 hover:bg-green-900/40"
+                            variant="outline"
+                            onClick={() => setIsSuccess(false)}
+                        >
+                            Register Another Participant
+                        </Button>
+                    </div>
                 </CardContent>
             </Card>
         );
@@ -314,6 +374,76 @@ export function RegistrationForm() {
                             {form.formState.errors.principalPhone && (
                                 <p className="text-sm text-red-500">{form.formState.errors.principalPhone.message}</p>
                             )}
+                        </div>
+                    </div>
+
+                    {/* Payment Section */}
+                    <div className="rounded-xl border border-yellow-500/20 bg-yellow-500/5 p-6 space-y-6">
+                        <div className="flex items-center gap-3 border-b border-yellow-500/10 pb-4">
+                            <div className="bg-yellow-500/20 p-2 rounded-full">
+                                <span className="text-yellow-500 font-bold text-xl">₹</span>
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold text-yellow-200">Registration Fee: ₹300</h3>
+                                <p className="text-sm text-yellow-500/60">Scan the QR code to pay using any UPI app</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col md:flex-row gap-8 items-center justify-center">
+                            {/* QR Code */}
+                            <div className="bg-white p-4 rounded-xl shadow-lg shrink-0">
+                                <Image
+                                    src="/qr-code.jpeg"
+                                    alt="UPI QR Code"
+                                    width={200}
+                                    height={200}
+                                    className="object-contain"
+                                />
+                                <p className="text-center text-black font-mono text-xs mt-2 font-bold">ubaidh4308@okicici</p>
+                            </div>
+
+                            {/* Upload Section */}
+                            <div className="flex-1 space-y-4 w-full">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium">Upload Payment Receipt</label>
+                                    <div className="flex items-center gap-4">
+                                        <div className="relative w-full">
+                                            <Input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={handleFileUpload}
+                                                disabled={uploading || !!receiptUrl}
+                                                className="cursor-pointer file:cursor-pointer file:text-yellow-500 file:border-0 file:bg-transparent file:font-semibold"
+                                            />
+                                            {uploading && (
+                                                <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-md backdrop-blur-sm">
+                                                    <Loader2 className="w-5 h-5 animate-spin text-yellow-500" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Upload a screenshot of the successful payment transaction.</p>
+                                </div>
+
+                                {receiptUrl && (
+                                    <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400">
+                                        <Check className="w-5 h-5" />
+                                        <span className="text-sm font-medium">Receipt Uploaded Successfully</span>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="sm"
+                                            className="ml-auto h-6 text-xs hover:text-red-400"
+                                            onClick={() => {
+                                                setReceiptUrl(null);
+                                                form.setValue('receiptUrl', '');
+                                            }}
+                                        >
+                                            Change
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
 
