@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import path from 'path';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
+import { put } from '@vercel/blob';
 import sharp from 'sharp';
 
 export async function POST(req: NextRequest) {
@@ -21,35 +19,32 @@ export async function POST(req: NextRequest) {
 
         const buffer = Buffer.from(await file.arrayBuffer());
 
-        // Directory setup
-        const uploadDir = path.join(process.cwd(), 'public/uploads/receipts');
-        if (!existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
-        }
-
-        const timestamp = Date.now();
-        const safeName = instituteName ? instituteName.replace(/[^a-zA-Z0-9]/g, '_') : 'unknown';
-        const filename = `${safeName}_Receipt_${timestamp}.webp`;
-        const filepath = path.join(uploadDir, filename);
-
-        // Compress and Save using Sharp
+        // Compress and Process using Sharp (In-Memory)
         // Resize to max 1200px width, convert to WebP, quality 80
-        await sharp(buffer)
+        const processedImageBuffer = await sharp(buffer)
             .resize(1200, null, { // Width 1200, height auto
                 withoutEnlargement: true
             })
             .webp({ quality: 80 })
-            .toFile(filepath);
+            .toBuffer();
 
-        const fileUrl = `/uploads/receipts/${filename}`;
+        const timestamp = Date.now();
+        const safeName = instituteName ? instituteName.replace(/[^a-zA-Z0-9]/g, '_') : 'unknown';
+        const filename = `receipts/${safeName}_Receipt_${timestamp}.webp`;
+
+        // Upload to Vercel Blob
+        const blob = await put(filename, processedImageBuffer, {
+            access: 'public',
+            contentType: 'image/webp'
+        });
 
         return NextResponse.json({
             success: true,
-            url: fileUrl
+            url: blob.url
         });
 
     } catch (error) {
-        console.error('Local Upload Error:', error);
+        console.error('Upload Error:', error);
         return NextResponse.json(
             { error: 'Failed to upload receipt', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
